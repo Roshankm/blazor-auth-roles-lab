@@ -1,0 +1,76 @@
+@page "/login"
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject IUserStore Users
+@inject NavigationManager Nav
+
+<PageTitle>Sign in</PageTitle>
+
+<h1>Sign in</h1>
+
+<div class="col-md-5">
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger" data-test="login-error">@_error</div>
+    }
+
+    <EditForm Model="Input" FormName="login" OnValidSubmit="LoginAsync">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label class="form-label" for="user">User name</label>
+            <InputText id="user" class="form-control" @bind-Value="Input!.UserName" autocomplete="username" />
+            <ValidationMessage For="() => Input!.UserName" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="Input!.Password" autocomplete="current-password" />
+            <ValidationMessage For="() => Input!.Password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </EditForm>
+
+    <p class="small text-muted mt-3">
+        Demo users: alice, bob, carol. Password: <code>@InMemoryUserStore.DemoPassword</code>
+    </p>
+</div>
+
+@code {
+    private string? _error;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private LoginInput? Input { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized() => Input ??= new();
+
+    private async Task LoginAsync()
+    {
+        var user = Users.Validate(Input!.UserName, Input.Password);
+        if (user is null)
+        {
+            _error = "Invalid user name or password.";
+            return;
+        }
+
+        // Static SSR: this runs inside a normal HTTP request, so the auth cookie can be written.
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            user.ToPrincipal(CookieAuthenticationDefaults.AuthenticationScheme));
+
+        Nav.NavigateTo(LocalUrl.OrHome(ReturnUrl));
+    }
+
+    private sealed class LoginInput
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string UserName { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Password { get; set; } = string.Empty;
+    }
+}

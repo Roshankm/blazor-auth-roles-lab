@@ -1,0 +1,32 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+
+<nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="">Auth &amp; Roles Lab</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><NavLink class="nav-link" href="leave">My leave</NavLink></li>
+            <li class="nav-item"><NavLink class="nav-link" href="approvals">Approvals</NavLink></li>
+            <li class="nav-item"><NavLink class="nav-link" href="finance">Finance</NavLink></li>
+            <li class="nav-item"><NavLink class="nav-link" href="senior">Senior staff</NavLink></li>
+            <li class="nav-item"><NavLink class="nav-link" href="admin">Admin</NavLink></li>
+        </ul>
+        <AuthorizeView>
+            <Authorized>
+                <span class="navbar-text me-2">@context.User.FindFirst("display_name")?.Value</span>
+                <form method="post" action="logout" class="d-inline">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="returnUrl" value="/" />
+                    <button type="submit" class="btn btn-sm btn-outline-light">Sign out</button>
+                </form>
+            </Authorized>
+            <NotAuthorized>
+                <a class="btn btn-sm btn-light" href="login">Sign in</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</nav>
+
+<main class="container pb-5">
+    @Body
+</main>

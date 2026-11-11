@@ -1,0 +1,24 @@
+@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
+@inject IUserStore Users
+
+<PageTitle>Admin</PageTitle>
+
+<h1>Admin area</h1>
+<p class="text-muted">Protected with <code>[Authorize(Roles = "Admin")]</code>.</p>
+
+<table class="table">
+    <thead><tr><th>User</th><th>Role</th><th>Department</th><th>Hired</th><th>Password hash (Identity v3)</th></tr></thead>
+    <tbody>
+        @foreach (var u in Users.All)
+        {
+            <tr>
+                <td>@u.UserName</td>
+                <td>@u.Role</td>
+                <td>@u.Department</td>
+                <td>@u.HireDate.ToString("yyyy-MM-dd")</td>
+                <td class="small text-muted">@u.PasswordHash[..24]&hellip;</td>
+            </tr>
+        }
+    </tbody>
+</table>

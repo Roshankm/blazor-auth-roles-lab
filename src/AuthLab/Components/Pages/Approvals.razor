@@ -1,0 +1,42 @@
+@page "/approvals"
+@attribute [Authorize(Policy = Policies.CanApproveLeave)]
+@inject LeaveService Leave
+
+<PageTitle>Approvals</PageTitle>
+
+<h1>Leave approvals</h1>
+<p class="text-muted">Protected with a role-based policy: <code>RequireRole("Manager", "Admin")</code>.</p>
+
+@if (_message is not null)
+{
+    <div class="alert alert-success">@_message</div>
+}
+
+<form method="post" @formname="approve" @onsubmit="Approve">
+    <AntiforgeryToken />
+    <table class="table">
+        <thead><tr><th>#</th><th>Employee</th><th>Dates</th><th>Reason</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var r in Leave.Pending())
+            {
+                <tr>
+                    <td>@r.Id</td>
+                    <td>@r.EmployeeUserName</td>
+                    <td>@r.From &ndash; @r.To</td>
+                    <td>@r.Reason</td>
+                    <td><button type="submit" name="ApproveId" value="@r.Id" class="btn btn-sm btn-success">Approve</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+@code {
+    private string? _message;
+
+    [SupplyParameterFromForm(FormName = "approve")]
+    private int ApproveId { get; set; }
+
+    private void Approve() =>
+        _message = Leave.Approve(ApproveId) ? $"Request #{ApproveId} approved." : $"Request #{ApproveId} could not be approved.";
+}

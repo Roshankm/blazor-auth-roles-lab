@@ -1,0 +1,71 @@
+@page "/"
+@inject IAuthorizationService Authorization
+
+<PageTitle>Auth &amp; Roles Lab</PageTitle>
+
+<h1>Authentication and authorization in Blazor</h1>
+<p class="lead">Cookie sign-in with role, claim, custom-requirement and resource-based policies.</p>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="alert alert-info">
+            <a href="login">Sign in</a> as <strong>alice</strong> (Admin), <strong>bob</strong> (Manager, Finance) or
+            <strong>carol</strong> (Employee, Finance, new joiner). The password for all three is <code>@InMemoryUserStore.DemoPassword</code>.
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <h2 class="h5">Signed in as @context.User.Identity?.Name</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h3 class="h6">Your claims</h3>
+                <table class="table table-sm">
+                    @foreach (var claim in context.User.Claims)
+                    {
+                        <tr><td class="text-muted">@ShortType(claim.Type)</td><td>@claim.Value</td></tr>
+                    }
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h3 class="h6">What you can do</h3>
+                <table class="table table-sm" data-test="policies">
+                    @foreach (var (policy, allowed) in _policyResults)
+                    {
+                        <tr>
+                            <td>@policy</td>
+                            <td class="@(allowed ? "allowed" : "denied")">@(allowed ? "Allowed" : "Denied")</td>
+                        </tr>
+                    }
+                </table>
+
+                <AuthorizeView Roles="Admin" Context="adminContext">
+                    <div class="alert alert-warning small mb-0">This box is only rendered for the <strong>Admin</strong> role.</div>
+                </AuthorizeView>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private List<(string Policy, bool Allowed)> _policyResults = [];
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
+        foreach (var policy in Policies.All)
+        {
+            var result = await Authorization.AuthorizeAsync(user, policy);
+            _policyResults.Add((policy, result.Succeeded));
+        }
+    }
+
+    private static string ShortType(string type) => type.Contains('/') ? type[(type.LastIndexOf('/') + 1)..] : type;
+}

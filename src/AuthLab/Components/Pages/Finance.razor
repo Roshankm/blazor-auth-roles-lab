@@ -1,0 +1,7 @@
+@page "/finance"
+@attribute [Authorize(Policy = Policies.FinanceOnly)]
+
+<PageTitle>Finance</PageTitle>
+
+<h1>Finance dashboard</h1>
+<p class="text-muted">Protected with a claim-based policy: <code>RequireClaim("department", "Finance")</code>. Bob and Carol can see this; Alice (IT) can't, even though she is an admin.</p>

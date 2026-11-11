@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+
+# Test results and coverage
+TestResults/
+coverage/
+*.trx
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets and local settings
+appsettings.*.local.json
+*.pfx
+.env
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+html, body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+h1:focus {
+    outline: none;
+}
+
+.allowed {
+    color: #198754;
+}
+
+.denied {
+    color: #dc3545;
+}

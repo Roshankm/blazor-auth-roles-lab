@@ -1,0 +1,7 @@
+@page "/senior"
+@attribute [Authorize(Policy = Policies.SeniorStaff)]
+
+<PageTitle>Senior staff</PageTitle>
+
+<h1>Senior staff area</h1>
+<p class="text-muted">Protected with a custom requirement: <code>MinimumTenureRequirement(2)</code>, evaluated from the <code>hire_date</code> claim. Carol joined four months ago, so she is denied.</p>
